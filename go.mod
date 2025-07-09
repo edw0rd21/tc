@@ -1,4 +1,4 @@
-module tc
+module github.com/edw0rd21/tc
 
 go 1.24.5
 

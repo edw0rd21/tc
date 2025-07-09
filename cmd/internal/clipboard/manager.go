@@ -20,7 +20,7 @@ func NewManager() (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &Manager{
 		storage: storage,
 	}, nil
@@ -29,7 +29,7 @@ func NewManager() (*Manager, error) {
 // StartWatcher starts monitoring clipboard changes
 func (m *Manager) StartWatcher() error {
 	lastContent := ""
-	
+
 	// Get current clipboard content
 	current, err := clipboard.ReadAll()
 	if err == nil {
@@ -38,24 +38,24 @@ func (m *Manager) StartWatcher() error {
 			m.storage.AddItem(current)
 		}
 	}
-	
+
 	// Monitor for changes
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
-	
+
 	for range ticker.C {
 		content, err := clipboard.ReadAll()
 		if err != nil {
 			continue
 		}
-		
+
 		// Only add if content changed and is not empty
 		if content != lastContent && strings.TrimSpace(content) != "" {
 			m.storage.AddItem(content)
 			lastContent = content
 		}
 	}
-	
+
 	return nil
 }
 
@@ -77,18 +77,18 @@ func (m *Manager) ClearHistory() error {
 // FormatItem formats a clipboard item for display
 func (m *Manager) FormatItem(item storage.ClipboardItem, index int) string {
 	content := item.Content
-	
+
 	// Truncate long content
 	if len(content) > 80 {
 		content = content[:77] + "..."
 	}
-	
+
 	// Replace newlines with spaces for display
 	content = strings.ReplaceAll(content, "\n", " ")
 	content = strings.ReplaceAll(content, "\r", " ")
-	
+
 	// Format timestamp
 	timeStr := item.Timestamp.Format("15:04:05")
-	
+
 	return fmt.Sprintf("%d: [%s] %s", index+1, timeStr, content)
 }
