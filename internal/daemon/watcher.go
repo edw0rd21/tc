@@ -32,7 +32,7 @@ func (w *Watcher) Start() {
 	if err == nil && strings.TrimSpace(current) != "" {
 		w.manager.AddItem(current)
 		lastContent = current
-		fmt.Println("📋 Initial clipboard captured.")
+		fmt.Println("Initial clipboard captured.")
 	}
 
 	ticker := time.NewTicker(500 * time.Millisecond)

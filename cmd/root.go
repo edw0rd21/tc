@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/edw0rd21/tc/internal/clipboard"
 	"github.com/edw0rd21/tc/internal/daemon"
@@ -26,6 +27,7 @@ var rootCmd = &cobra.Command{
 	Long:  `Terminal Clipboard (tc) is a CLI tool that keeps track of your clipboard history and allows you to access previous clipboard items.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		startWatcher()
+		time.Sleep(300 * time.Millisecond)
 		// Default behavior: show last 2 items
 		showLastItems(2)
 	},
