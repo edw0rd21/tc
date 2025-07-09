@@ -3,7 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"tc/internal/clipboard"
+
+	"github.com/edw0rd21/tc/internal/clipboard"
 
 	"github.com/spf13/cobra"
 )
@@ -31,22 +32,22 @@ func showLastItems(n int) {
 		fmt.Printf("Error initializing clipboard manager: %v\n", err)
 		return
 	}
-	
+
 	items, err := manager.GetLastItems(n)
 	if err != nil {
 		fmt.Printf("Error getting clipboard history: %v\n", err)
 		return
 	}
-	
+
 	if len(items) == 0 {
 		fmt.Println("No clipboard history found.")
 		return
 	}
-	
+
 	fmt.Printf("Last %d clipboard items:\n\n", len(items))
 	for i, item := range items {
 		fmt.Println(manager.FormatItem(item, i))
 	}
-	
+
 	fmt.Println("\nUse 'tc copy <number>' to copy an item back to clipboard")
 }

@@ -3,8 +3,9 @@ package clipboard
 import (
 	"fmt"
 	"strings"
-	"tc/internal/storage"
 	"time"
+
+	"github.com/edw0rd21/tc/internal/storage"
 
 	"github.com/atotto/clipboard"
 )
@@ -12,6 +13,10 @@ import (
 // Manager handles clipboard operations
 type Manager struct {
 	storage *storage.Storage
+}
+
+func (m *Manager) AddItem(content string) {
+	m.storage.AddItem(content)
 }
 
 // NewManager creates a new clipboard manager
@@ -40,7 +45,7 @@ func (m *Manager) StartWatcher() error {
 	}
 
 	// Monitor for changes
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
