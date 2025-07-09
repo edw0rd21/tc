@@ -5,15 +5,27 @@ import (
 	"os"
 
 	"github.com/edw0rd21/tc/internal/clipboard"
-
+	"github.com/edw0rd21/tc/internal/daemon"
 	"github.com/spf13/cobra"
 )
+
+func startWatcher() {
+	go func() {
+		watcher, err := daemon.NewWatcher()
+		if err != nil {
+			fmt.Println("Watcher error:", err)
+			return
+		}
+		watcher.Start()
+	}()
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "tc",
 	Short: "Terminal Clipboard - A CLI clipboard manager for Mac",
 	Long:  `Terminal Clipboard (tc) is a CLI tool that keeps track of your clipboard history and allows you to access previous clipboard items.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		startWatcher()
 		// Default behavior: show last 2 items
 		showLastItems(2)
 	},
