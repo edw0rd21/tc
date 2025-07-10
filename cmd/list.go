@@ -14,20 +14,20 @@ var listCmd = &cobra.Command{
 	Long:  `Displays the most recent clipboard history items. Optionally specify how many items to show.`,
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		count := 10 // default
+		count, _ := cmd.Flags().GetInt("count")
 
-		// If a count argument is provided, use it
+		// If a positional argument is provided, override the flag
 		if len(args) > 0 {
-			var err error
-			count, err = strconv.Atoi(args[0])
+			userCount, err := strconv.Atoi(args[0])
 			if err != nil {
 				fmt.Printf("tc list: Invalid count: %s\n", args[0])
 				return
 			}
-			if count < 1 {
+			if userCount < 1 {
 				fmt.Println("tc list: Count must be 1 or greater")
 				return
 			}
+			count = userCount // Override flag with positional
 		}
 
 		manager, err := clipboard.NewManager()
