@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		startWatcher()
 		time.Sleep(300 * time.Millisecond)
-		// Default behavior: show last 2 items
+		// Default behavior
 		showLastItems(5)
 	},
 }
