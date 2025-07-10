@@ -1,0 +1,61 @@
+package cmd
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/edw0rd21/tc/internal/clipboard"
+
+	"github.com/spf13/cobra"
+)
+
+var copyCmd = &cobra.Command{
+	Use:   "copy <index>",
+	Short: "Copy a specific item on clipboard",
+	Long:  `Copy a specific item from clipboard history back to the system clipboard.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		index, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Printf("Invalid index: %s\n", args[0])
+			return
+		}
+
+		if index < 1 {
+			fmt.Println("Index must be 1 or greater")
+			return
+		}
+
+		manager, err := clipboard.NewManager()
+		if err != nil {
+			fmt.Printf("Error initializing clipboard manager: %v\n", err)
+			return
+		}
+
+		items, err := manager.GetLastItems(100) // Get enough items
+		if err != nil {
+			fmt.Printf("Error getting clipboard history: %v\n", err)
+			return
+		}
+
+		if index > len(items) {
+			fmt.Printf("Index %d is out of range. Only %d items available.\n", index, len(items))
+			return
+		}
+
+		// Convert to 0-based index
+		item := items[index-1]
+
+		err = manager.CopyToClipboard(item.Content)
+		if err != nil {
+			fmt.Printf("Error copying to clipboard: %v\n", err)
+			return
+		}
+
+		fmt.Printf("Copied item %d to clipboard\n", index)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(copyCmd)
+}

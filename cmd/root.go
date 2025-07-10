@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 		startWatcher()
 		time.Sleep(300 * time.Millisecond)
 		// Default behavior: show last 2 items
-		showLastItems(2)
+		showLastItems(5)
 	},
 }
 

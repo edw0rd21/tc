@@ -3,7 +3,6 @@ package clipboard
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/edw0rd21/tc/internal/storage"
 
@@ -29,39 +28,6 @@ func NewManager() (*Manager, error) {
 	return &Manager{
 		storage: storage,
 	}, nil
-}
-
-// StartWatcher starts monitoring clipboard changes
-func (m *Manager) StartWatcher() error {
-	lastContent := ""
-
-	// Get current clipboard content
-	current, err := clipboard.ReadAll()
-	if err == nil {
-		lastContent = current
-		if strings.TrimSpace(current) != "" {
-			m.storage.AddItem(current)
-		}
-	}
-
-	// Monitor for changes
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		content, err := clipboard.ReadAll()
-		if err != nil {
-			continue
-		}
-
-		// Only add if content changed and is not empty
-		if content != lastContent && strings.TrimSpace(content) != "" {
-			m.storage.AddItem(content)
-			lastContent = content
-		}
-	}
-
-	return nil
 }
 
 // GetLastItems returns the last n clipboard items
@@ -95,5 +61,5 @@ func (m *Manager) FormatItem(item storage.ClipboardItem, index int) string {
 	// Format timestamp
 	timeStr := item.Timestamp.Format("15:04:05")
 
-	return fmt.Sprintf("%d: [%s] %s", index+1, timeStr, content)
+	return fmt.Sprintf("%d➤ [%s] %s", index+1, timeStr, content)
 }
