@@ -48,13 +48,6 @@ var copyCmd = &cobra.Command{
 		// Convert to 0-based index
 		item := items[index-1]
 
-		// Check if we should show preview
-		preview, _ := cmd.Flags().GetBool("preview")
-		if preview {
-			fmt.Printf("Preview of item %d:\n%s\n", index, manager.FormatItem(item, index-1))
-			return
-		}
-
 		err = manager.CopyToClipboard(item.Content)
 		if err != nil {
 			fmt.Printf("tc copy: Error copying to clipboard: %v\n", err)
@@ -72,6 +65,5 @@ var copyCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(copyCmd)
 	copyCmd.Flags().IntP("limit", "l", 100, "Maximum number of items to search through")
-	copyCmd.Flags().BoolP("preview", "p", false, "Preview the item without copying it")
 	copyCmd.Flags().BoolP("quiet", "q", false, "Suppress output messages")
 }

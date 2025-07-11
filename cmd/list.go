@@ -9,26 +9,17 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list [count]",
+	Use:   "list [index]",
 	Short: "List clipboard history items",
-	Long:  `Displays the most recent clipboard history items. Optionally specify how many items to show.`,
-	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		count, _ := cmd.Flags().GetInt("count")
+	Long: `Displays clipboard history items.
 
-		// If a positional argument is provided, override the flag
-		if len(args) > 0 {
-			userCount, err := strconv.Atoi(args[0])
-			if err != nil {
-				fmt.Printf("tc list: Invalid count: %s\n", args[0])
-				return
-			}
-			if userCount < 1 {
-				fmt.Println("tc list: Count must be 1 or greater")
-				return
-			}
-			count = userCount // Override flag with positional
-		}
+- If a number is passed as an argument (e.g., 'tc list 3'), shows that specific item.
+- Use the --count (-n) flag to list the most recent N items (default is 10).`,
+	Args: cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		// Check if --count flag was explicitly set
+		countFlagUsed := cmd.Flags().Changed("count")
+		count, _ := cmd.Flags().GetInt("count")
 
 		manager, err := clipboard.NewManager()
 		if err != nil {
@@ -36,12 +27,34 @@ var listCmd = &cobra.Command{
 			return
 		}
 
+		// Case: user provides a single index as argument (e.g., 'tc list 3')
+		if len(args) > 0 && !countFlagUsed {
+			index, err := strconv.Atoi(args[0])
+			if err != nil || index < 1 {
+				fmt.Printf("tc list: Invalid index: %s\n", args[0])
+				return
+			}
+
+			items, err := manager.GetLastItems(index)
+			if err != nil {
+				fmt.Printf("tc list: Error retrieving clipboard history: %v\n", err)
+				return
+			}
+			if index > len(items) {
+				fmt.Printf("tc list: Index %d is out of range. Only %d items available.\n", index, len(items))
+				return
+			}
+
+			fmt.Println(manager.FormatItem(items[index-1], index-1))
+			return
+		}
+
+		// Default or --count: list last N items
 		items, err := manager.GetLastItems(count)
 		if err != nil {
 			fmt.Printf("tc list: Error retrieving clipboard history: %v\n", err)
 			return
 		}
-
 		if len(items) == 0 {
 			fmt.Println("No clipboard history found.")
 			return
@@ -55,5 +68,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().IntP("count", "n", 10, "Number of clipboard items to list (alternative to positional argument)")
+	listCmd.Flags().IntP("count", "n", 10, "Number of clipboard items to list")
 }

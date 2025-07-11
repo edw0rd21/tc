@@ -9,12 +9,10 @@ import (
 	myclip "github.com/edw0rd21/tc/internal/clipboard"
 )
 
-// Watcher handles background clipboard monitoring
 type Watcher struct {
 	manager *myclip.Manager
 }
 
-// NewWatcher creates a new clipboard watcher
 func NewWatcher() (*Watcher, error) {
 	manager, err := myclip.NewManager()
 	if err != nil {
@@ -23,11 +21,10 @@ func NewWatcher() (*Watcher, error) {
 	return &Watcher{manager: manager}, nil
 }
 
-// Start begins monitoring clipboard changes
 func (w *Watcher) Start() {
 	lastContent := ""
 
-	// Attempt to capture current clipboard on start
+	//attempt to capture current clipboard on start
 	current, err := clipboard.ReadAll()
 	if err == nil && strings.TrimSpace(current) != "" {
 		w.manager.AddItem(current)
@@ -50,7 +47,8 @@ func (w *Watcher) Start() {
 	}
 }
 
-// trim safely shortens clipboard log output
+// trim shortens clipboard log output
+// unused
 func trim(s string) string {
 	s = strings.ReplaceAll(s, "\n", " ")
 	s = strings.TrimSpace(s)
