@@ -8,27 +8,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	countFlag int
+	fullFlag  bool
+)
+
 var listCmd = &cobra.Command{
 	Use:   "list [index]",
 	Short: "List clipboard history items",
 	Long: `Displays clipboard history items.
 
-- If a number is passed as an argument (e.g., 'tc list 3'), shows that specific item.
-- Use the --count (-n) flag to list the most recent N items (default is 10).`,
+- No args: shows last N items (default 10), truncated
+- [index]: shows item at that index, truncated (or full if --full is set)
+- -n / --count: number of recent items to list
+- -f / --full: show full content (no truncation)`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Check if --count flag was explicitly set
-		countFlagUsed := cmd.Flags().Changed("count")
-		count, _ := cmd.Flags().GetInt("count")
-
 		manager, err := clipboard.NewManager()
 		if err != nil {
 			fmt.Printf("tc list: Error initializing clipboard manager: %v\n", err)
 			return
 		}
 
-		// Case: user provides a single index as argument (e.g., 'tc list 3')
-		if len(args) > 0 && !countFlagUsed {
+		// If positional index is given (e.g., `tc list 3`)
+		if len(args) > 0 {
 			index, err := strconv.Atoi(args[0])
 			if err != nil || index < 1 {
 				fmt.Printf("tc list: Invalid index: %s\n", args[0])
@@ -45,12 +48,17 @@ var listCmd = &cobra.Command{
 				return
 			}
 
-			fmt.Println(manager.FormatItem(items[index-1], index-1))
+			item := items[index-1]
+			if fullFlag {
+				fmt.Printf("%d➤ [%s] %s\n", index, item.Timestamp.Format("15:04:05"), item.Content)
+			} else {
+				fmt.Println(manager.FormatItem(item, index-1))
+			}
 			return
 		}
 
-		// Default or --count: list last N items
-		items, err := manager.GetLastItems(count)
+		// Default listing
+		items, err := manager.GetLastItems(countFlag)
 		if err != nil {
 			fmt.Printf("tc list: Error retrieving clipboard history: %v\n", err)
 			return
@@ -61,12 +69,17 @@ var listCmd = &cobra.Command{
 		}
 
 		for i, item := range items {
-			fmt.Println(manager.FormatItem(item, i))
+			if fullFlag {
+				fmt.Printf("%d➤ [%s] %s\n", i+1, item.Timestamp.Format("15:04:05"), item.Content)
+			} else {
+				fmt.Println(manager.FormatItem(item, i))
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().IntP("count", "n", 10, "Number of clipboard items to list")
+	listCmd.Flags().IntVarP(&countFlag, "count", "n", 10, "Number of clipboard items to list")
+	listCmd.Flags().BoolVarP(&fullFlag, "full", "f", false, "Show full content (no truncation)")
 }
