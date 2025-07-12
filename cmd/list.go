@@ -11,6 +11,7 @@ import (
 var (
 	countFlag int
 	fullFlag  bool
+	rawFlag   bool
 )
 
 var listCmd = &cobra.Command{
@@ -21,7 +22,8 @@ var listCmd = &cobra.Command{
 - No args: shows last N items (default 10), truncated
 - [index]: shows item at that index, truncated (or full if --full is set)
 - -n / --count: number of recent items to list
-- -f / --full: show full content (no truncation)`,
+- -f / --full: show full content (no truncation)
+- -r / --raw: show raw content without formatting`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		manager, err := clipboard.NewManager()
@@ -49,9 +51,13 @@ var listCmd = &cobra.Command{
 			}
 
 			item := items[index-1]
-			if fullFlag {
+
+			switch {
+			case rawFlag:
+				fmt.Println(item.Content)
+			case fullFlag:
 				fmt.Printf("%d➤ [%s] %s\n", index, item.Timestamp.Format("15:04:05"), item.Content)
-			} else {
+			default:
 				fmt.Println(manager.FormatItem(item, index-1))
 			}
 			return
@@ -69,9 +75,12 @@ var listCmd = &cobra.Command{
 		}
 
 		for i, item := range items {
-			if fullFlag {
+			switch {
+			case rawFlag:
+				fmt.Println(item.Content)
+			case fullFlag:
 				fmt.Printf("%d➤ [%s] %s\n", i+1, item.Timestamp.Format("15:04:05"), item.Content)
-			} else {
+			default:
 				fmt.Println(manager.FormatItem(item, i))
 			}
 		}
@@ -80,6 +89,7 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().IntVarP(&countFlag, "count", "n", 10, "Number of clipboard items to list")
+	listCmd.Flags().IntVarP(&countFlag, "count", "n", 10, "Number of items to list")
 	listCmd.Flags().BoolVarP(&fullFlag, "full", "f", false, "Show full content (no truncation)")
+	listCmd.Flags().BoolVarP(&rawFlag, "raw", "r", false, "Show raw content only (no formatting)")
 }

@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	previewFlag bool
+)
+
 var copyCmd = &cobra.Command{
 	Use:   "copy <index>",
 	Short: "Copy a specific item on clipboard",
@@ -59,6 +63,10 @@ var copyCmd = &cobra.Command{
 		if !quiet {
 			fmt.Printf("Copied item %d to clipboard\n", index)
 		}
+
+		if previewFlag {
+			fmt.Printf("\nPreview of item %d:\n%s\n", index, manager.FormatItem(item, index-1))
+		}
 	},
 }
 
@@ -66,4 +74,5 @@ func init() {
 	rootCmd.AddCommand(copyCmd)
 	copyCmd.Flags().IntP("limit", "l", 100, "Maximum number of items to search through")
 	copyCmd.Flags().BoolP("quiet", "q", false, "Suppress output messages")
+	copyCmd.Flags().BoolVarP(&previewFlag, "preview", "p", false, "Preview content being copied")
 }
