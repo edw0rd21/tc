@@ -19,11 +19,10 @@ var listCmd = &cobra.Command{
 	Short: "List clipboard history items",
 	Long: `Displays clipboard history items.
 
-- No args: shows last N items (default 10), truncated
-- [index]: shows item at that index, truncated (or full if --full is set)
-- -n / --count: number of recent items to list
-- -f / --full: show full content (no truncation)
-- -r / --raw: show raw content without formatting`,
+- Positional index: shows a specific item.
+- --count / -n: how many recent items to show (default 10).
+- --full / -f: disables truncation.
+- --raw / -r: prints only clipboard content, no formatting.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		manager, err := clipboard.NewManager()
@@ -32,7 +31,6 @@ var listCmd = &cobra.Command{
 			return
 		}
 
-		// If positional index is given (e.g., `tc list 3`)
 		if len(args) > 0 {
 			index, err := strconv.Atoi(args[0])
 			if err != nil || index < 1 {
@@ -51,19 +49,14 @@ var listCmd = &cobra.Command{
 			}
 
 			item := items[index-1]
-
-			switch {
-			case rawFlag:
-				fmt.Println(item.Content)
-			case fullFlag:
-				fmt.Printf("%d➤ [%s] %s\n", index, item.Timestamp.Format("15:04:05"), item.Content)
-			default:
-				fmt.Println(manager.FormatItem(item, index-1))
-			}
+			fmt.Println(manager.FormatItem(item, clipboard.FormatOptions{
+				Index: index - 1,
+				Full:  fullFlag,
+				Raw:   rawFlag,
+			}))
 			return
 		}
 
-		// Default listing
 		items, err := manager.GetLastItems(countFlag)
 		if err != nil {
 			fmt.Printf("tc list: Error retrieving clipboard history: %v\n", err)
@@ -75,21 +68,18 @@ var listCmd = &cobra.Command{
 		}
 
 		for i, item := range items {
-			switch {
-			case rawFlag:
-				fmt.Println(item.Content)
-			case fullFlag:
-				fmt.Printf("%d➤ [%s] %s\n", i+1, item.Timestamp.Format("15:04:05"), item.Content)
-			default:
-				fmt.Println(manager.FormatItem(item, i))
-			}
+			fmt.Println(manager.FormatItem(item, clipboard.FormatOptions{
+				Index: i,
+				Full:  fullFlag,
+				Raw:   rawFlag,
+			}))
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().IntVarP(&countFlag, "count", "n", 10, "Number of items to list")
+	listCmd.Flags().IntVarP(&countFlag, "count", "n", 10, "Number of clipboard items to list")
 	listCmd.Flags().BoolVarP(&fullFlag, "full", "f", false, "Show full content (no truncation)")
-	listCmd.Flags().BoolVarP(&rawFlag, "raw", "r", false, "Show raw content only (no formatting)")
+	listCmd.Flags().BoolVarP(&rawFlag, "raw", "r", false, "Show only raw clipboard content (no formatting)")
 }

@@ -65,7 +65,11 @@ var copyCmd = &cobra.Command{
 		}
 
 		if previewFlag {
-			fmt.Printf("\nPreview of item %d:\n%s\n", index, manager.FormatItem(item, index-1))
+			fmt.Printf("\nPreview of item %d:\n%s\n", index, manager.FormatItem(item, clipboard.FormatOptions{
+				Index: index - 1,
+				Full:  false,
+				Raw:   false,
+			}))
 		}
 	},
 }
