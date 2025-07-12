@@ -18,11 +18,10 @@ var listCmd = &cobra.Command{
 	Use:   "list [index]",
 	Short: "List clipboard history items",
 	Long: `Displays clipboard history items.
-
-- Positional index: shows a specific item.
-- --count / -n: how many recent items to show (default 10).
-- --full / -f: disables truncation.
-- --raw / -r: prints only clipboard content, no formatting.`,
+	
+	- --count / -n: how many recent items to show (default 10).
+	- --full / -f: disables truncation.
+	- --raw / -r: prints only clipboard content, no formatting.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		manager, err := clipboard.NewManager()
