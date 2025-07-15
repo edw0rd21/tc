@@ -23,7 +23,7 @@ Examples:
   tc list 3          Show 3rd item from history
   tc copy 2          Copy item #2 to clipboard
   tc clear           Erase clipboard history
-  tc daemon          Start background watcher (run this in .zshrc)`,
+  tc daemon          Start background watcher`,
 }
 
 func Execute() {
